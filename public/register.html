@@ -1,0 +1,35 @@
+{% extends "base_auth.html" %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h1 class="text-center mb-4">Inscription</h1>
+            {% if msg %}
+            <div class="alert alert-warning" role="alert">{{ msg }}</div>
+            {% endif %}
+            <form action="" method="post">
+                <div class="form-group">
+                    <label for="name">Nom:</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="Entrez votre nom" required>
+                </div>                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Entrez votre email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe:</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Entrez votre mot de passe" required>
+                </div>
+                <div class="text-center">
+                    <input type="submit" class="btn btn-primary" name="send" value="S'inscrire">
+                </div>
+            </form>
+            <div class="text-right mt-3">
+                <a href="login.php">Déjà un compte ?</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

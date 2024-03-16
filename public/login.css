@@ -1,0 +1,151 @@
+body {
+    background-color: #f0f2f5; /* Couleur de fond */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url('/images/fondsite.png'); /* Adjust the path to your image */
+    background-size: cover; /* Couvre toute la zone disponible */
+    background-attachment: fixed; /* L'image de fond reste fixe lors du défilement */
+    background-position: center center; /* Centre l'image de fond */
+    background-repeat: no-repeat; /* Ne répète pas l'image */
+}
+
+form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    
+}
+
+input[type="text"], input[type="email"], input[type="password"] {
+    width: 100%; /* Makes the input take the full width of its parent container */
+    box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+    /* Additional styling */
+    padding: 10px;
+    margin-bottom: 10px; /* Space between fields */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-group {
+    max-width: 600px; /* Set a max-width for the form for better layout on larger screens */
+    margin: auto; /* Center the form on the page */
+}
+
+input[type=submit] {
+    background-color: #4CAF50; /* Couleur du bouton */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+input[type=submit]:hover {
+    opacity: 0.8;
+}
+
+a.link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.text-right {
+    text-align: right;
+}
+
+
+
+.container {
+    padding-top: 70px; /* Ajoute un espace en haut du contenu pour ne pas être caché par la nav bar */
+  }
+
+header {
+  background: #55d6aa;
+}
+
+header::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.logo {
+  float: left;
+  padding: 10px 0;
+}
+
+nav {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(255, 255, 255, 0.5); /* Ou toute autre couleur de fond */
+    z-index: 1000; /* Assure que la nav est au-dessus des autres éléments */
+  }
+  
+  /* Position nav items to the right */
+  .logo {
+    float: left;
+    padding: 10px 0;
+    display: flex;
+    align-items: center; /* Centrer le logo et le texte verticalement */
+    margin-left: 20px; /* Ajouter de l'espace à gauche */
+  }
+  
+  .logo img {
+    margin-right: 10px; /* Espace entre le logo et le texte */
+    border-radius: 50%; /* Rend le logo rond */
+    height: 50px; /* Ajustez selon la taille souhaitée */
+    width: 50px; /* Assurez-vous que la largeur et la hauteur sont égales pour un cercle parfait */
+  }
+  
+  nav ul {
+    float: right;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav ul li {
+    display: inline-block;
+    margin-right: 20px; /* Espace entre les éléments */
+  }
+
+nav li {
+  display: inline-block;
+  margin-left: 70px;
+  padding-top: 23px;
+
+  position: relative;
+}
+
+nav a {
+  color: #444;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+nav a:hover {
+  color: #000;
+}
+
+nav a::before {
+  content: '';
+  display: block;
+  height: 5px;
+  background-color: #444;
+
+  position: absolute;
+  top: 0;
+  width: 0%;
+
+  transition: all ease-in-out 250ms;
+}
+
+nav a:hover::before {
+  width: 100%;
+}

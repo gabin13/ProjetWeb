@@ -32,6 +32,10 @@ class Page {
         ]);
     }
 
+    public function getPdo() {
+        return $this->pdo;
+    }
+
     public function render(string $name, array $data = []) {
         echo $this->twig->render($name, $data);
     }
@@ -125,6 +129,65 @@ class Page {
         
         return $success;
     }
+
+
+    public function getInterventionsWithIntervenantEmail() {
+        $sql = "SELECT i.InterventionID, i.Title, i.Description, u.Email AS IntervenantEmail
+                FROM interventions i
+                JOIN intervenantassignments ia ON i.InterventionID = ia.InterventionID
+                JOIN users u ON ia.IntervenantID = u.UserID
+                WHERE i.ClientID = :clientID AND u.Role = 'Intervenant'";
+    
+        $stmt = $this->pdo->prepare($sql);
+        // Vous devez passer l'ID du client comme paramètre pour filtrer les interventions de ce client spécifique.
+        $stmt->execute([':clientID' => $this->session->get('user')['UserID']]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function addComment($CommentText, $UserId, $InterventionId) {
+        $sql = "INSERT INTO comments (CommentText, UserID, InterventionID, CommentDateTime) VALUES (:CommentText, :UserId, :InterventionId, NOW())";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            ':CommentText' => $CommentText,
+            ':UserId' => $UserId,
+            ':InterventionId' => $InterventionId
+        ]);
+    }
+    
+    public function getCommentsByInterventionId($interventionId) {
+        $sql = "SELECT c.CommentText, c.CommentDateTime, u.UserName 
+                FROM comments c
+                JOIN users u ON c.UserID = u.UserID
+                WHERE c.InterventionID = :interventionId
+                ORDER BY c.CommentDateTime DESC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':interventionId' => $interventionId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getInterventionsByIntervenant($intervenantId) {
+        $pdo = $this->getPdo();
+        try {
+            $sql = "SELECT i.*, s.Description AS StatusName
+                    FROM interventions i
+                    INNER JOIN intervenantassignments ia ON i.InterventionID = ia.InterventionID
+                    LEFT JOIN interventionstatus s ON i.StatusID = s.StatusID
+                    WHERE ia.IntervenantID = :intervenantId";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':intervenantId', $intervenantId, PDO::PARAM_INT);
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+    
+            
+    
+            return $results;
+        } catch (PDOException $e) {
+            die('Erreur lors de la récupération des interventions : ' . $e->getMessage());
+        }
+    }
+    
     
     
 }

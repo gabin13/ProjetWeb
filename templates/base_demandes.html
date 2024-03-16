@@ -48,32 +48,88 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
-    <script>
-        document.querySelectorAll('.service-card').forEach(card => {
-          const imageUrl = card.getAttribute('data-img');
-          card.style.backgroundImage = `url('${imageUrl}')`;
+<script>
+    document.querySelectorAll('.service-card').forEach(card => {
+        const imageUrl = card.getAttribute('data-img');
+        card.style.backgroundImage = `url('${imageUrl}')`;
     });
 
     $(document).ready(function(){
-    $('.service-card').click(function(){
+        $('.service-card').click(function(){
+            var title = $(this).data('title');
+            var img = $(this).data('img');
+            var detail = $(this).data('detail');
+            var status = $(this).data('status');
+
+            $('#serviceModalLabel').text(title);
+            $('#serviceImage').attr('src', img);
+            $('#serviceDetail').html(`<strong>Description:</strong> ${detail}<br><strong>Status:</strong> ${status}`);
+
+            // Ajoutez le bouton de commentaire si le statut est 'Clôturée'
+            if (status === 'Clôturée') {
+                var commentButton = `<div class="d-flex justify-content-end mt-2">
+                                        <button type="button" class="btn btn-primary btn-sm" id="leaveComment">Laisser un commentaire</button>
+                                      </div>`;
+                $('#serviceDetail').append(commentButton);
+            }
+
+            $('#serviceModal').modal('show');
+    });
+
+    $(document).ready(function(){
+    // Correction de la récupération de l'ID d'intervention
+    $(document).on('click', '#leaveComment', function(){
+    var interventionId = $(this).closest('.service-card').data('interventionId'); 
+    console.log(interventionId); // Ajoutez cette ligne pour le débogage
+    $('#InterventionIdForComment').val(interventionId);
+    $('#commentModal').modal('show');
+});
+
+
+    // Gestion de la soumission du formulaire de commentaire
+    
+});
+
+$(document).ready(function() {
+    // Gestion du clic sur les cartes de service pour ouvrir le modal de détails
+    $('.service-card').click(function() {
         var title = $(this).data('title');
         var img = $(this).data('img');
         var detail = $(this).data('detail');
-        
+        var status = $(this).data('status');
+
         $('#serviceModalLabel').text(title);
         $('#serviceImage').attr('src', img);
-        $('#serviceDetail').text(detail);
-        
-        // Le numéro de téléphone est déjà présent dans le modal, pas besoin de le mettre à jour
-        
+        $('#serviceDetail').html(`<strong>Description:</strong> ${detail}<br><strong>Status:</strong> ${status}`);
+
+        // Afficher ou non le bouton de commentaire basé sur le statut
+        if (status === 'Clôturée') {
+            $('#leaveComment').remove(); // Supprime un éventuel bouton existant pour éviter les duplications
+            var commentButton = `<button type="button" class="btn btn-primary btn-sm open-comment-modal" data-intervention-id="${$(this).data('intervention-id')}">Laisser un commentaire</button>`;
+            $('#serviceDetail').append(commentButton);
+        }
+
         $('#serviceModal').modal('show');
+    });
+
+    // Gestion de l'ouverture du modal de commentaire et passage de l'ID d'intervention
+    $(document).ready(function() {
+    // Assurez-vous que les sélecteurs correspondent à ceux de vos boutons pour ouvrir le modal de commentaire.
+    $(document).on('click', '.open-comment-modal', function() {
+        var interventionId = $(this).data('intervention-id');
+    console.log("Intervention ID récupéré pour le commentaire:", interventionId); // Pour le débogage
+    $('#InterventionIdForComment').val(interventionId);
+    $('#commentModal').modal('show');
     });
 });
 
-    </script>
-    
-    </body>
+});
 
 
-    
+
+
+});
+
+</script>
+</body>
 </html>

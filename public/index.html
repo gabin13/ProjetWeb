@@ -1,0 +1,200 @@
+{% extends "base_index.html" %}
+
+{% block body %}
+
+{% if message %}
+    <div class="alert alert-success">
+        {{ message }}
+    </div>
+{% endif %}
+
+{% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+{% endif %}
+
+{% if session.user and session.user.Role == 'Admin' %}
+    <!-- Tableau pour les administrateurs -->
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.UserID }}</td>
+                    <td>{{ user.Name }}</td>
+                    <td>{{ user.Email }}</td>
+                    <td>
+                        <form action="updateRole.php" method="post">
+                            <input type="hidden" name="userId" value="{{ user.UserID }}">
+                            <select name="role" onchange="this.form.submit()">
+                                <option value="Admin" {% if user.Role == 'Admin' %}selected{% endif %}>Admin</option>
+                                <option value="Standardiste" {% if user.Role == 'Standardiste' %}selected{% endif %}>Standardiste</option>
+                                <option value="Intervenant" {% if user.Role == 'Intervenant' %}selected{% endif %}>Intervenant</option>
+                                <option value="Client" {% if user.Role == 'Client' %}selected{% endif %}>Client</option>
+                            </select>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+{% else %}
+<div class="container">
+
+  {% if session.user and session.user.Role == 'Standardiste' %}
+    <!-- Bouton pour les standardistes -->
+    <div class="d-flex justify-content-end">
+      <button type="button" class="btn btn-success rounded-circle" style="width: 50px; height: 50px; background-color: #006400;" data-toggle="modal" data-target="#standardisteModal">
+          <i class="bi bi-plus" style="font-size: 20px; color: white;"></i>
+      </button>
+    </div>
+
+    <!-- Formulaire modal pour les standardistes -->
+    <div class="modal fade" id="standardisteModal" tabindex="-1" role="dialog" aria-labelledby="standardisteModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="standardisteModalLabel">Nouvelle Entrée</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                  <!-- Formulaire -->
+                  <form action="process_intervention.php" method="post">
+                      <!-- Champ pour l'email du client -->
+                      <div class="form-group">
+                          <label for="clientEmail">Email du client:</label>
+                          <input type="email" class="form-control" id="clientEmail" name="clientEmail" required>
+                      </div>
+                      
+                      <!-- Liste déroulante des emails des intervenants -->
+                      <div class="form-group">
+                        <label for="intervenantEmail">Assigner à l'intervenant:</label>
+                        <select id="intervenantEmail" name="intervenantEmail" class="form-control" required>
+                            {% for intervenant in intervenants %}
+                                <option value="{{ intervenant.Email }}">{{ intervenant.Email }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                      
+                      <!-- Champ pour la date de l'intervention -->
+                      <div class="form-group">
+                          <label for="dateIntervention">Date de l'intervention:</label>
+                          <input type="date" class="form-control" id="dateIntervention" name="dateIntervention" required>
+                      </div>
+                      
+                      <!-- Menu déroulant pour le titre de l'intervention -->
+                      <div class="form-group">
+                          <label for="titreIntervention">Titre de l'intervention:</label>
+                          <select id="titreIntervention" name="titreIntervention" class="form-control" required>
+                              <option value="Installation de panneaux solaires">Installation de panneaux solaires</option>
+                              <option value="Entretien du chauffage">Entretien du chauffage</option>
+                              <option value="Isolation des combles">Isolation des combles</option>
+                              <option value="Réparation des conduites d'air">Réparation des conduites d'air</option>
+                              <option value="Isolation des tuyaux de plomberie">Isolation des tuyaux de plomberie</option>
+                              <option value="Réparation des radiateurs">Réparation des radiateurs</option>
+                              <!-- Ajoutez d'autres options ici -->
+                          </select>
+                      </div>
+                      
+                      <!-- Champ de texte pour la description -->
+                      <div class="form-group">
+                          <label for="description">Description:</label>
+                          <textarea id="description" name="description" class="form-control" required></textarea>
+                      </div>
+                      
+                      <button type="submit" class="btn btn-primary">Envoyer</button>
+                  </form>
+              </div>
+          </div>
+      </div>
+  </div>
+    {% endif %}
+
+    <div class="row">
+      <!-- Exemple pour une carte -->
+      <div class="col-md-4">
+          <div class="service-card open-modal" data-title="Installation de panneaux solaires" data-img="images/Panneauxsolaires.png" data-detail="Nos experts installeront des panneaux solaires de haute qualité pour maximiser votre efficacité énergétique.">
+              <h3>Installation de panneaux solaires</h3>
+          </div>
+      </div>
+  
+      <!-- Additional service card -->
+      <div class="col-md-4">
+          <div class="service-card open-modal" data-title="Entretien du chauffage" data-img="images/Chauffage.png" data-detail="Un entretien régulier de votre système de chauffage peut prolonger sa durée de vie et améliorer son efficacité.">
+              <h3>Entretien du chauffage</h3>
+          </div>
+      </div>
+  
+      <!-- Additional service card -->
+      <div class="col-md-4">
+          <div class="service-card open-modal" data-title="Isolation des combles" data-img="images/combles.png" data-detail="Isoler vos combles peut considérablement réduire les pertes de chaleur et améliorer le confort de votre habitation.">
+              <h3>Isolation des combles</h3>
+          </div>
+      </div>
+  
+      <!-- Additional service card -->
+      <div class="col-md-4">
+          <div class="service-card open-modal" data-title="Réparation des conduites d'air" data-img="images/ConduitsAir.png" data-detail="Nous réparons et remplaçons vos conduits d'air pour améliorer la qualité de l'air et l'efficacité de votre système CVC.">
+              <h3>Réparation des conduites d'air</h3>
+          </div>
+      </div>
+  
+      <!-- Additional service card -->
+      <div class="col-md-4">
+          <div class="service-card open-modal" data-title="Isolation des tuyaux de plomberie" data-img="images/IsolationTuyaux.png" data-detail="L'isolation des tuyaux de plomberie empêche les pertes de chaleur et le gel des tuyaux durant l'hiver.">
+              <h3>Isolation des tuyaux de plomberie</h3>
+          </div>
+      </div>
+  
+      <!-- Additional service card -->
+      <div class="col-md-4">
+          <div class="service-card open-modal" data-title="Réparation des radiateurs" data-img="images/Radiateurs.png" data-detail="Nous offrons des services de réparation et de remplacement des radiateurs pour garder votre maison au chaud pendant l'hiver.">
+              <h3>Réparation des radiateurs</h3>
+          </div>
+      </div>
+      <!-- Add more service cards as needed -->
+  </div>
+  
+
+  {% if session.user %}
+    <!-- Modal and Script for registered users -->
+    <!-- Modal Structure -->
+    <!-- Modal Structure -->
+<div class="modal fade" id="serviceModal" tabindex="-1" role="dialog" aria-labelledby="serviceModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="serviceModalLabel">Titre du Service</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <img id="serviceImage" src="" alt="Service" style="width:100%;">
+        <div class="separator"></div>
+        <p id="serviceDetail"></p>
+        <!-- Ligne ajoutée pour le numéro de téléphone -->
+        <p>Numéro de téléphone du standardiste : 01 23 45 67 89</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+  {% endif %}
+
+{% endif %}
+
+{% endblock %}
