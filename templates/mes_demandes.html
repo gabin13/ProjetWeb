@@ -1,0 +1,40 @@
+{% extends "base_demandes.html" %}
+
+{% block body %}
+<div class="container custom-container">
+    <h2>Mes Demandes</h2>
+    
+    {% set statusDescriptions = {1: 'En attente', 2: 'En cours', 3: 'Terminée', 4: 'Clôturée'} %}
+    {% set imagesByTitle = {
+        "Installation de panneaux solaires": "images/Panneauxsolaires.png",
+        "Entretien du chauffage": "images/Chauffage.png",
+        "Isolation des combles": "images/combles.png",
+        "Réparation des conduites d'air": "images/ConduitsAir.png",
+        "Isolation des tuyaux de plomberie": "images/IsolationTuyaux.png",
+        "Réparation des radiateurs": "images/Radiateurs.png"
+    } %}
+    
+    {% for statusID, statusName in statusDescriptions %}
+        <div class="statut-titre">{{ statusName }}</div>
+        
+        <div class="row">
+            {% set found = false %}
+            {% for intervention in interventions %}
+                {% if intervention.StatusID == statusID %}
+                    {% set found = true %}
+                    <div class="col-md-4">
+                        <div class="service-card open-modal" data-title="{{ intervention.Title }}" data-img="{{ imagesByTitle[intervention.Title] | default('path/to/default.jpg') }}" data-detail="{{ intervention.Description }}">
+                            <!-- Assurez-vous que cette balise img est la seule source d'images dans la carte -->
+                            
+                            <h3>{{ intervention.Title }}</h3>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            {% if not found %}
+                <p class="aucune-intervention col-12">Aucune intervention pour "{{ statusName }}"</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
