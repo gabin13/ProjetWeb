@@ -187,6 +187,28 @@ class Page {
             die('Erreur lors de la récupération des interventions : ' . $e->getMessage());
         }
     }
+
+    public function updateInterventionStatus($interventionId, $newStatus) {
+        $stmt = $this->pdo->prepare("UPDATE interventions SET StatusID = :newStatus WHERE InterventionID = :interventionId");
+        return $stmt->execute([':interventionId' => $interventionId, ':newStatus' => $newStatus]);
+    }
+
+    public function hasOngoingIntervention($intervenantId) {
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(*)
+            FROM interventions i
+            JOIN intervenantassignments ia ON i.InterventionID = ia.InterventionID
+            WHERE ia.IntervenantID = :intervenantId AND i.StatusID = 2
+        ");
+        $stmt->execute([':intervenantId' => $intervenantId]);
+        $count = $stmt->fetchColumn();
+        
+        return $count > 0;
+    }
+    
+    
+    
+    
     
     
     

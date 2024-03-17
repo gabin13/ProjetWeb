@@ -6,6 +6,13 @@
 <div class="container custom-container">
     <h2>Mes Demandes</h2>
     
+    {% if session.error %}
+    <div class="alert alert-danger" role="alert">
+        {{ session.error }}
+    </div>
+    {% endif %}
+
+
     {% set statusDescriptions = {1: 'En attente', 2: 'En cours', 3: 'Terminée', 4: 'Clôturée'} %}
     {% set imagesByTitle = {
         "Installation de panneaux solaires": "images/Panneauxsolaires.png",
@@ -19,24 +26,38 @@
     
     {% if session.user.Role == 'Intervenant' %}
     {% for statusID, statusName in statusDescriptions %}
-    <div class="statut-titre">{{ statusName }}</div>
-    <div class="row">
-        {% set found = false %}
-        {% for intervention in interventions %}
-            {% if intervention.StatusID == statusID %}
-                {% set found = true %}
-                <div class="col-md-4">
+    
+<div class="statut-titre">{{ statusName }}</div>
+<div class="row">
+    {% set found = false %}
+    {% for intervention in interventions %}
+        {% if intervention.StatusID == statusID %}
+            {% set found = true %}
+            <div class="col-md-4">
+                <div class="card-wrapper">
                     <div class="service-card" data-title="{{ intervention.Title }}" data-img="{{ imagesByTitle[intervention.Title]|default('path/to/default.jpg') }}" data-detail="{{ intervention.Description }}" data-status="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">
                         <h3>{{ intervention.Title }}</h3>
                     </div>
+                    <div class="text-center mt-2">
+                        {% if intervention.StatusID == 4 %}
+                            <!-- Bouton pour ouvrir le modal de commentaire pour les interventions clôturées -->
+                            <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#commentModal" data-id="{{ intervention.ID }}">Laisser un commentaire</button>
+                        {% else %}
+                            <!-- Bouton pour modifier le statut pour les autres interventions -->
+                            <button type="button" class="btn btn-info btn-sm modifier-statut-btn" data-toggle="modal" data-target="#statusModal" data-id="{{ intervention.InterventionID }}" data-status="{{ intervention.StatusID }}" data-status-text="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">Modifier le Statut</button>
+                        {% endif %}
+                    </div>
                 </div>
-            {% endif %}
-        {% endfor %}
-        {% if not found %}
-            <p class="aucune-intervention col-12">Aucune intervention pour "{{ statusName }}"</p>
+            </div>
         {% endif %}
-    </div>
+    {% endfor %}
+    {% if not found %}
+        <p class="aucune-intervention col-12">Aucune intervention pour "{{ statusName }}"</p>
+    {% endif %}
+</div>
 {% endfor %}
+
+
 {% else %}
         {% for statusID, statusName in statusDescriptions %}
             <div class="statut-titre">{{ statusName }}</div>
@@ -46,8 +67,16 @@
                     {% if intervention.StatusID == statusID %}
                         {% set found = true %}
                         <div class="col-md-4">
-                            <div class="service-card open-modal" data-title="{{ intervention.Title }}" data-img="{{ imagesByTitle[intervention.Title]|default('path/to/default.jpg') }}" data-detail="{{ intervention.Description }}" data-status="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">
-                                <h3>{{ intervention.Title }}</h3>
+                            <div class="card-wrapper">
+                                <div class="service-card" data-title="{{ intervention.Title }}" data-img="{{ imagesByTitle[intervention.Title]|default('path/to/default.jpg') }}" data-detail="{{ intervention.Description }}" data-status="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">
+                                    <h3>{{ intervention.Title }}</h3>
+                                </div>
+                                <div class="text-center mt-2">
+                                    {% if intervention.StatusID == 4 %}
+                                        <!-- Affiche le bouton de commentaire pour les clients dans les interventions clôturées -->
+                                        <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#commentModal" data-id="{{ intervention.ID }}">Laisser un commentaire</button>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     {% endif %}
@@ -102,6 +131,44 @@
     </div>
   </div>
 </div>
+
+
+<!-- Modal pour modifier le statut -->
+<!-- Modal pour modifier le statut -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">Modifier le Statut</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Début du formulaire de mise à jour du statut -->
+                <form action="updateInterventionStatus.php" method="post">
+                    <div class="form-group">
+                        <label for="currentStatus">Statut Actuel:</label>
+                        <input type="text" class="form-control" id="currentStatus" name="currentStatus" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="newStatus">Nouveau Statut:</label>
+                        <select class="form-control" name="status" id="newStatus" onchange="this.form.submit()">
+                            <option value="1">En attente</option>
+                            <option value="2">En cours</option>
+                            <option value="3">Terminée</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="interventionId" name="interventionId">
+                </form>
+                <!-- Fin du formulaire -->
+            </div>
+        </div>
+    </div>
+  </div>
+  
+
+
 
 
 {% endblock %}
