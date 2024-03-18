@@ -7,9 +7,10 @@
     <h2>Mes Demandes</h2>
     
     {% if session.error %}
-    <div class="alert alert-danger" role="alert">
-        {{ session.error }}
+    <div id="alert-message" style="display:none;" class="alert alert-success">
+        Votre message ici.
     </div>
+    
     {% endif %}
 
 
@@ -35,13 +36,29 @@
             {% set found = true %}
             <div class="col-md-4">
                 <div class="card-wrapper">
-                    <div class="service-card" data-title="{{ intervention.Title }}" data-img="{{ imagesByTitle[intervention.Title]|default('path/to/default.jpg') }}" data-detail="{{ intervention.Description }}" data-status="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">
-                        <h3>{{ intervention.Title }}</h3>
+                    <div class="service-card {% if intervention.UrgencyLevelID == 3 %}urgent{% endif %}"
+                        data-title="{{ intervention.Title }}"
+                        data-img="{{ imagesByTitle[intervention.Title]|default('path/to/default.jpg') }}"
+                        data-detail="{{ intervention.Description }}"
+                        data-status="{{ statusDescriptions[intervention.StatusID] }}"
+                        data-intervention-id="{{ intervention.ID }}"
+                        data-planned-date="{{ intervention.InterventionDate|date('Y-m-d') }}"
+                        data-urgency-level="{{ intervention.UrgencyLevelID }}">
+
+                        
+                        <h3>
+                            {% if intervention.UrgencyLevelID == 3 %}
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            {% endif %}
+                            {{ intervention.Title }}
+                        </h3>
+                        <!-- Ajoutez d'autres éléments de la carte ici si nécessaire -->
                     </div>
                     <div class="text-center mt-2">
                         {% if intervention.StatusID == 4 %}
                             <!-- Bouton pour ouvrir le modal de commentaire pour les interventions clôturées -->
-                            <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#commentModal" data-id="{{ intervention.ID }}">Laisser un commentaire</button>
+                            <button type="button" class="btn btn-secondary btn-sm open-comment-modal" data-toggle="modal" data-target="#commentModal" data-id="{{ intervention.InterventionID }}" data-intervention-id="{{ intervention.ID }}">Laisser un commentaire</button>
+
                         {% else %}
                             <!-- Bouton pour modifier le statut pour les autres interventions -->
                             <button type="button" class="btn btn-info btn-sm modifier-statut-btn" data-toggle="modal" data-target="#statusModal" data-id="{{ intervention.InterventionID }}" data-status="{{ intervention.StatusID }}" data-status-text="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">Modifier le Statut</button>
@@ -100,6 +117,7 @@
               <img id="serviceImage" src="" alt="Service" style="width:100%;">
               <div class="separator"></div>
               <p id="serviceDetail"></p>
+              <p id="plannedDate">Date prévue: <span></span></p>
               <!-- Ligne ajoutée pour le numéro de téléphone -->
               
             </div>
@@ -120,13 +138,15 @@
       </div>
       <div class="modal-body">
         <form action="submit_comment.php" method="post">
-          <div class="form-group">
-              <label for="CommentText">Votre commentaire</label>
-              <textarea class="form-control" id="CommentText" name="CommentText" rows="3" required></textarea>
-          </div>
-          <input type="hidden" id="InterventionIdForComment" name="InterventionID">
-          <button type="submit" class="btn btn-primary">Envoyer le commentaire</button>
-      </form>
+            <div class="form-group">
+                <label for="CommentText">Votre commentaire</label>
+                <textarea class="form-control" id="CommentText" name="CommentText" rows="3" required></textarea>
+            </div>
+            <!-- Assurez-vous que la valeur de InterventionID est correctement définie -->
+            <input type="hidden" id="InterventionIdForComment" name="InterventionID" value="InterventionID">
+            <button type="submit" class="btn btn-primary">Envoyer le commentaire</button>
+        </form>
+        
       </div> 
     </div>
   </div>
