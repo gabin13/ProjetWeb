@@ -101,14 +101,19 @@ class Page {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function checkInterventionExists($clientID, $titreIntervention) {
-        $sql = "SELECT COUNT(*) FROM interventions WHERE ClientID = :clientID AND Title = :titreIntervention";
+    public function checkInterventionExistsAndNotClosed($clientID, $titreIntervention) {
+        // Supposons que le statut "clôturée" ait un StatusID de 4
+        $sql = "SELECT COUNT(*) FROM interventions 
+                WHERE ClientID = :clientID 
+                AND Title = :titreIntervention 
+                AND StatusID != 4"; // Ajout de la condition pour exclure les interventions clôturées
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['clientID' => $clientID, 'titreIntervention' => $titreIntervention]);
         $count = $stmt->fetchColumn();
         
-        return $count > 0; // Retourne true si une intervention existe déjà, false sinon
+        return $count > 0; // Retourne true si une intervention non clôturée existe déjà, false sinon
     }
+    
 
     public function getClientIDByEmail($email) {
         $sql = "SELECT UserID FROM users WHERE Email = :email";
@@ -144,26 +149,9 @@ class Page {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function addComment($CommentText, $UserId, $InterventionId) {
-        $sql = "INSERT INTO comments (CommentText, UserID, InterventionID, CommentDateTime) VALUES (:CommentText, :UserId, :InterventionId, NOW())";
-        $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([
-            ':CommentText' => $CommentText,
-            ':UserId' => $UserId,
-            ':InterventionId' => $InterventionId
-        ]);
-    }
     
-    public function getCommentsByInterventionId($interventionId) {
-        $sql = "SELECT c.CommentText, c.CommentDateTime, u.UserName 
-                FROM comments c
-                JOIN users u ON c.UserID = u.UserID
-                WHERE c.InterventionID = :interventionId
-                ORDER BY c.CommentDateTime DESC";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':interventionId' => $interventionId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    
+    
 
     public function getInterventionsByIntervenant($intervenantId) {
         $pdo = $this->getPdo();
@@ -205,6 +193,88 @@ class Page {
         
         return $count > 0;
     }
+    
+    public function closePastDueInterventions() {
+        $today = date('Y-m-d H:i:s');
+        $stmt = $this->pdo->prepare("UPDATE interventions SET StatusID = 4 WHERE StatusID = 1 AND InterventionDate < :today");
+        $stmt->execute([':today' => $today]);
+    }
+
+    public function countUrgentInterventionsWaiting($intervenantEmail) {
+        // Récupérer l'ID de l'intervenant à partir de son email
+        $sqlIntervenantId = "SELECT UserID FROM users WHERE Email = :intervenantEmail";
+        $stmtIntervenantId = $this->pdo->prepare($sqlIntervenantId);
+        $stmtIntervenantId->execute([':intervenantEmail' => $intervenantEmail]);
+        $intervenantId = $stmtIntervenantId->fetchColumn();
+    
+        if (!$intervenantId) {
+            return false; // Intervenant non trouvé
+        }
+    
+        // Compter les interventions urgentes et en attente pour cet intervenant
+        $sql = "SELECT COUNT(*) 
+                FROM interventions 
+                JOIN intervenantassignments ON interventions.InterventionID = intervenantassignments.InterventionID
+                WHERE intervenantassignments.IntervenantID = :intervenantId
+                AND interventions.StatusID = 1
+                AND interventions.UrgencyLevelID = 3";
+    
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':intervenantId' => $intervenantId]);
+        $count = $stmt->fetchColumn();
+    
+        return $count;
+    }
+
+
+    
+    public function addComment($commentText, $interventionID, $userID) {
+        // Validation de base
+
+        if ($this->userHasCommented($interventionID, $userID)) {
+            // L'utilisateur a déjà commenté cette intervention
+            return false; // Ou retourner un message spécifique
+        }
+
+        if (empty($commentText) || empty($interventionID) || empty($userID)) {
+            return false; // Retourne immédiatement si l'une des valeurs est vide
+        }
+    
+        try {
+            $sql = "INSERT INTO comments (CommentText, InterventionID, UserID, CommentDateTime) VALUES (?, ?, ?, NOW())";
+            $stmt = $this->pdo->prepare($sql);
+            // Exécution avec les paramètres positionnels pour éviter les problèmes liés au typage
+            $success = $stmt->execute([$commentText, $interventionID, $userID]);
+    
+            return $success;
+        } catch (PDOException $e) {
+            // Log de l'erreur pour le débogage
+            error_log('Erreur lors de l\'ajout d\'un commentaire: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    
+    public function userHasCommented($interventionID, $userID) {
+        $sql = "SELECT COUNT(*) FROM comments WHERE InterventionID = :interventionID AND UserID = :userID";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':interventionID' => $interventionID,
+            ':userID' => $userID
+        ]);
+        $count = $stmt->fetchColumn();
+    
+        return $count > 0; // Retourne true si l'utilisateur a déjà commenté, sinon false
+    }
+    
+
+
+
+
+    
+    
+    
+    
     
     
     
