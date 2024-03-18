@@ -20,6 +20,9 @@ if (!isset($_SESSION['user'])) {
 
 $page = new Page();
 $pdo = $page->getPdo();
+
+$page->closePastDueInterventions();
+
 $interventions = [];
 
 // Assuming $_SESSION['user']['Id'] holds the intervenant's ID
