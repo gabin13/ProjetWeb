@@ -30,6 +30,9 @@
                 <li><a href="/mes_demandes.php">Mes demandes</a></li>
                 {% elseif session.user.Role == 'Intervenant' %}
                 <li><a href="/mes_demandes.php">Mes interventions</a></li>
+                {% elseif session.user.Role == 'Standardiste' %}
+                <li><a href="/mes_demandes.php">Tableau de bord</a></li>
+                <li><a href="/les_clients.php">Clients</a></li>
                 {% else %}
                 <li><a href="/mes_demandes.php">Tableau de bord</a></li>
                 {% endif %}
@@ -152,6 +155,25 @@ document.querySelectorAll('.service-card').forEach(card => {
         });
     }
 });
+
+
+$('.edit-intervention-btn').click(function() {
+        var interventionId = $(this).data('intervention-id');
+        var title = $(this).data('intervention-title');
+        var description = $(this).data('intervention-description');
+        var date = $(this).data('intervention-date');
+        
+        $('#editInterventionId').val(interventionId);
+        $('#staticTitle').text(title); // Affiche le titre sans le rendre modifiable
+        $('#editDescription').text(description); // Utilisez .val() si vous préférez
+        $('#editDate').val(date);
+    });
+
+
+
+
+
+
 
 });
 })(jQuery);

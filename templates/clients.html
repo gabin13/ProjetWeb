@@ -1,0 +1,42 @@
+{% extends "base_index.html" %}
+
+{% block body %}
+
+{% if message %}
+    <div class="alert alert-success">
+        {{ message }}
+    </div>
+{% endif %}
+
+{% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+{% endif %}
+
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Rôle</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.UserID }}</td>
+                <td>{{ user.Name }}</td>
+                <td>{{ user.Email }}</td>
+                <td>{{ user.Role }}</td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

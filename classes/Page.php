@@ -361,6 +361,25 @@ class Page {
             return false;
         }
     }
+
+    public function updateIntervention($interventionId, $description, $date, $urgenceLevel) {
+        try {
+            $sql = "UPDATE interventions SET Description = :description, InterventionDate = :date, UrgencyLevelID = :urgenceLevel WHERE InterventionID = :interventionId";
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([
+                ':description' => $description,
+                ':date' => $date,
+                ':urgenceLevel' => $urgenceLevel,
+                ':interventionId' => $interventionId
+            ]);
+        } catch (PDOException $e) {
+            // Gérer l'erreur ici, par exemple en loggant l'erreur
+            return false;
+        }
+    }
+    
+    
+    
     
     
     
