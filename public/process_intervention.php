@@ -13,17 +13,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $titreIntervention = $_POST['titreIntervention'];
     $description = $_POST['description'];
 
+    $urgentInterventionsCount = $page->countUrgentInterventionsWaiting($intervenantEmail);
+    if ($urgentInterventionsCount >= 2) {
+    // L'intervenant a déjà 2 interventions urgentes en attente
+    $_SESSION['error'] = "Cet intervenant a déjà 2 interventions urgentes en attente.";
+    header('Location: mes_demandes.php');
+    exit();
+}
+
+
     // Vérifier si une intervention avec le même titre existe déjà pour ce client
     $clientID = $page->getClientIDByEmail($clientEmail);
 
 // Vérifier si une intervention avec le même titre et le même ClientID existe déjà
-$interventionExists = $page->checkInterventionExists($clientID, $titreIntervention);
+// Vérifier si une intervention non clôturée avec le même titre et le même ClientID existe déjà
+$interventionExists = $page->checkInterventionExistsAndNotClosed($clientID, $titreIntervention);
 
 if ($interventionExists) {
-    $_SESSION['error'] = "Une intervention avec le même titre existe déjà pour ce client.";
+    $_SESSION['error'] = "Une intervention non clôturée avec le même titre existe déjà pour ce client.";
     header('Location: ../index.php');
     exit();
 }
+
 
     // Calculer la différence en jours entre la date d'intervention et la date actuelle
     $dateNow = new DateTime();

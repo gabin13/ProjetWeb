@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accord Energie | {% block title %}{% endblock %} </title>
-    <link rel="stylesheet" href="/styles/demandes.css">
+    
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    
+    <link rel="stylesheet" href="/styles/demandes.css">
 
 
 </head>
@@ -26,7 +26,13 @@
             </div>
             <ul>
                 {% if session.user %}
-                    <li><a href="/mes_demandes.php">Mes demandes</a></li>
+                {% if session.user.Role == 'Client' %}
+                <li><a href="/mes_demandes.php">Mes demandes</a></li>
+                {% elseif session.user.Role == 'Intervenant' %}
+                <li><a href="/mes_demandes.php">Mes interventions</a></li>
+                {% else %}
+                <li><a href="/mes_demandes.php">Tableau de bord</a></li>
+                {% endif %}
                     <li><a href="/logout.php">Déconnexion</a></li>
                 {% else %}
                     <li><a href="/">Accueil</a></li>
@@ -48,113 +54,91 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 <script>
-    document.querySelectorAll('.service-card').forEach(card => {
+document.querySelectorAll('.service-card').forEach(card => {
         const imageUrl = card.getAttribute('data-img');
         card.style.backgroundImage = `url('${imageUrl}')`;
     });
 
-    $(document).ready(function(){
-        $('.service-card').click(function(){
+
+    $(document).ready(function() {
+        // Gestion des cartes de service
+        $('.service-card').click(function() {
             var title = $(this).data('title');
             var img = $(this).data('img');
             var detail = $(this).data('detail');
             var status = $(this).data('status');
+            var plannedDate = $(this).data('planned-date');
 
             $('#serviceModalLabel').text(title);
             $('#serviceImage').attr('src', img);
             $('#serviceDetail').html(`<strong>Description:</strong> ${detail}<br><strong>Status:</strong> ${status}`);
-
-            // Ajoutez le bouton de commentaire si le statut est 'Clôturée'
-            if (status === 'Clôturée') {
-                var commentButton = `<div class="d-flex justify-content-end mt-2">
-                                        <button type="button" class="btn btn-primary btn-sm" id="leaveComment">Laisser un commentaire</button>
-                                      </div>`;
-                $('#serviceDetail').append(commentButton);
-            }
+            $('#plannedDate span').text(plannedDate);
 
             $('#serviceModal').modal('show');
-    });
+        });
 
-    $(document).ready(function(){
-    // Correction de la récupération de l'ID d'intervention
-    $(document).on('click', '#leaveComment', function(){
-    var interventionId = $(this).closest('.service-card').data('interventionId'); 
-    console.log(interventionId); // Ajoutez cette ligne pour le débogage
-    $('#InterventionIdForComment').val(interventionId);
-    $('#commentModal').modal('show');
-});
+        // Gestion du bouton de commentaire
+        $(document).on('click', '.open-comment-modal', function() {
+            var interventionId = $(this).data('id');
+            $('#InterventionIdForComment').val(interventionId);
+            $('#commentModal').modal('show');
+        });
 
+        // Gestion du bouton de modification de statut
+        $('#statusModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var currentStatusText = button.data('status-text');
+            var interventionId = button.data('id');
 
-    // Gestion de la soumission du formulaire de commentaire
+            $(this).find('#currentStatus').val(currentStatusText);
+            $(this).find('#interventionId').val(interventionId);
+        });
+
+        // Gestion du bouton de clôture d'intervention
+        $(document).on('click', '.close-intervention-btn', function() {
+            var interventionId = $(this).data('id');
+            $.ajax({
+                url: 'closeIntervention.php',
+                type: 'POST',
+                data: { interventionId: interventionId, status: 4 },
+                dataType: 'json',
+                success: function(response) {
+                    alert(response.message);
+                    if (response.success) {
+                        location.reload();
+                    }
+                },
+                error: function() {
+                    alert("Une erreur est survenue lors de la communication avec le serveur.");
+                }
+            });
+        });
+
+        $(document).on('click', '.avoid-intervention-btn', function() {
+    var interventionId = $(this).data('id');
     
+    if(confirm("Êtes-vous sûr de vouloir annuler cette intervention ?")) {
+        $.ajax({
+            url: 'cancelIntervention.php',
+            type: 'POST',
+            data: {interventionId: interventionId},
+            dataType: 'json',
+            success: function(response) {
+                if(response.success) {
+                    alert(response.message);
+                    window.location.reload(); // Pour voir les changements immédiatement
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                alert("Erreur lors de la communication avec le serveur.");
+            }
+        });
+    }
 });
 
-$(document).ready(function() {
-    // Gestion du clic sur les cartes de service pour ouvrir le modal de détails
-    $('.service-card').click(function() {
-        var title = $(this).data('title');
-        var img = $(this).data('img');
-        var detail = $(this).data('detail');
-        var status = $(this).data('status');
-
-        $('#serviceModalLabel').text(title);
-        $('#serviceImage').attr('src', img);
-        $('#serviceDetail').html(`<strong>Description:</strong> ${detail}<br><strong>Status:</strong> ${status}`);
-
-        // Afficher ou non le bouton de commentaire basé sur le statut
-        
-        $('#serviceModal').modal('show');
     });
-
-    // Gestion de l'ouverture du modal de commentaire et passage de l'ID d'intervention
-    $(document).ready(function() {
-    // Assurez-vous que les sélecteurs correspondent à ceux de vos boutons pour ouvrir le modal de commentaire.
-    $(document).on('click', '.open-comment-modal', function() {
-        var interventionId = $(this).data('intervention-id');
-    console.log("Intervention ID récupéré pour le commentaire:", interventionId); // Pour le débogage
-    $('#InterventionIdForComment').val(interventionID);
-    $('#commentModal').modal('show');
-    });
-});
-
-});
-
-
-// Assurez-vous que jQuery est inclus
-$(document).ready(function() {
-    $('#statusModal').on('show.bs.modal', function(event) {
-        let button = $(event.relatedTarget); // Bouton qui a déclenché le modal
-        let currentStatusText = button.data('status-text'); // Texte du statut actuel
-        let currentStatusId = button.data('status'); // ID du statut actuel
-        let interventionId = button.data('id'); // ID de l'intervention
-
-        let modal = $(this);
-        modal.find('#currentStatus').val(currentStatusText); // Affichage du statut actuel dans le modal
-        modal.find('#newStatus').val(currentStatusId); // Sélection du statut actuel dans <select>
-        modal.find('#interventionId').val(interventionId); // Stockage de l'ID de l'intervention dans un champ caché
-    });
-
-    
-});
-
-$('#commentModal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget); // Bouton qui a déclenché le modal
-    var interventionId = button.data('id'); // Extraction de l'ID de l'intervention
-
-    var modal = $(this);
-    modal.find('#InterventionIdForComment').val(interventionId); // Mise à jour du champ caché avec l'ID de l'intervention
-});
-
-
-
-
-
-
-
-
-
-});
-
-</script>
+    </script>
 </body>
 </html>
