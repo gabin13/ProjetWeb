@@ -21,7 +21,13 @@
               </div>
             <ul>
                 {% if session.user %}
-                    <li><a href="/mes-demandes.php">Mes demandes</a></li>
+                {% if session.user.Role == 'Client' %}
+                <li><a href="/mes_demandes.php">Mes demandes</a></li>
+                {% elseif session.user.Role == 'Intervenant' %}
+                <li><a href="/mes_demandes.php">Mes interventions</a></li>
+                {% else %}
+                <li><a href="/mes_demandes.php">Tableau de bord</a></li>
+                {% endif %}
                     <li><a href="/logout.php">Déconnexion</a></li>
                 {% else %}
                     <li><a href="/">Accueil</a></li>

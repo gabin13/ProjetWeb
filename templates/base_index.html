@@ -6,6 +6,7 @@
     <title>Accord Energie | {% block title %}{% endblock %} </title>
     <link rel="stylesheet" href="/styles/index.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSLFuWqE2R4M36JzGTVsDJ0ScU6Ew2yGpB01N8" crossorigin="anonymous">
 
 
@@ -18,11 +19,20 @@
 
         <nav>
             <div class="logo">
-                <img src="/images/logo.jpg" alt="Logo" style="height: 50px;"> AccordEnergie
-              </div>
+                <!-- Mettez à jour le chemin dans href selon la structure de votre site -->
+                <a href="/">
+                    <img src="/images/logo.jpg" alt="Logo AccordEnergie" style="height: 50px;"> AccordEnergie
+                </a>
+            </div>
             <ul>
                 {% if session.user %}
-                    <li><a href="/mes-demandes.php">Mes demandes</a></li>
+                {% if session.user.Role == 'Client' %}
+                <li><a href="/mes_demandes.php">Mes demandes</a></li>
+                {% elseif session.user.Role == 'Intervenant' %}
+                <li><a href="/mes_demandes.php">Mes interventions</a></li>
+                {% else %}
+                <li><a href="/mes_demandes.php">Tableau de bord</a></li>
+                {% endif %}
                     <li><a href="/logout.php">Déconnexion</a></li>
                 {% else %}
                     <li><a href="/">Accueil</a></li>
@@ -51,18 +61,21 @@
     });
 
     $(document).ready(function(){
-        $('.service-card').click(function(){
-            var title = $(this).data('title');
-            var img = $(this).data('img');
-            var detail = $(this).data('detail');
-            
-            $('#serviceModalLabel').text(title);
-            $('#serviceImage').attr('src', img);
-            $('#serviceDetail').text(detail);
-            
-            $('#serviceModal').modal('show');
-        });
+    $('.service-card').click(function(){
+        var title = $(this).data('title');
+        var img = $(this).data('img');
+        var detail = $(this).data('detail');
+        
+        $('#serviceModalLabel').text(title);
+        $('#serviceImage').attr('src', img);
+        $('#serviceDetail').text(detail);
+        
+        // Le numéro de téléphone est déjà présent dans le modal, pas besoin de le mettre à jour
+        
+        $('#serviceModal').modal('show');
     });
+});
+
     </script>
     
     </body>

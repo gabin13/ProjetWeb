@@ -96,6 +96,13 @@ class Page {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    public function getClientByEmail($email) {
+        $stmt = $this->pdo->prepare("SELECT UserID FROM users WHERE Email = :email AND Role = 'Client'");
+        $stmt->execute(['email' => $email]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['UserID'] : null;
+    }
 
     public function getInterventionsByClientEmail($clientEmail) {
         $sql = "SELECT * FROM interventions WHERE ClientID = (SELECT UserID FROM users WHERE Email = :email)";
@@ -289,11 +296,82 @@ class Page {
         return $stmt->execute([':interventionId' => $interventionId, ':newStatus' => $statusCloturee]);
     }
 
-    public function ccancelInterventionStatus($interventionId) {
-        $statusCloturee = 4; // Assurez-vous que 4 est l'ID du statut "Clôturée"
-        $stmt = $this->pdo->prepare("UPDATE interventions SET StatusID = :newStatus WHERE InterventionID = :interventionId");
-        return $stmt->execute([':interventionId' => $interventionId, ':newStatus' => $statusCloturee]);
+    public function getCommentsByInterventionId($interventionId) {
+        $sql = "SELECT * FROM comments WHERE InterventionID = :interventionId";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['interventionId' => $interventionId]);
+
+        return $stmt->fetchAll();
     }
+
+    public function getAllInterventions() {
+        $sql = "SELECT * FROM interventions";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    
+    public function deleteUser($userId) {
+        try {
+            // Commencer une transaction
+            $this->pdo->beginTransaction();
+    
+            // Suppression des commentaires associés aux interventions de l'utilisateur
+            $stmtComments = $this->pdo->prepare(
+                "DELETE comments 
+                FROM comments 
+                JOIN interventions ON comments.InterventionID = interventions.InterventionID 
+                WHERE interventions.ClientID = :userId OR interventions.InterventionID IN (
+                    SELECT InterventionID FROM intervenantassignments WHERE IntervenantID = :userId
+                )"
+            );
+            $stmtComments->execute([':userId' => $userId]);
+    
+            // Suppression des assignations d'interventions liées à l'utilisateur (peu importe le rôle)
+            $stmtAssignments = $this->pdo->prepare(
+                "DELETE FROM intervenantassignments 
+                WHERE IntervenantID = :userId OR InterventionID IN (
+                    SELECT InterventionID FROM interventions WHERE ClientID = :userId
+                )"
+            );
+            $stmtAssignments->execute([':userId' => $userId]);
+    
+            // Suppression des interventions liées à l'utilisateur (comme client ou intervenant via assignations)
+            $stmtInterventions = $this->pdo->prepare(
+                "DELETE FROM interventions 
+                WHERE ClientID = :userId OR InterventionID IN (
+                    SELECT InterventionID FROM intervenantassignments WHERE IntervenantID = :userId
+                )"
+            );
+            $stmtInterventions->execute([':userId' => $userId]);
+    
+            // Finalement, supprimer l'utilisateur lui-même
+            $stmtUser = $this->pdo->prepare("DELETE FROM users WHERE UserID = :userId");
+            $stmtUser->execute([':userId' => $userId]);
+    
+            // Valider la transaction
+            $this->pdo->commit();
+    
+            return true;
+        } catch (PDOException $e) {
+            // Annuler la transaction en cas d'erreur
+            $this->pdo->rollBack();
+            error_log("Erreur lors de la suppression de l'utilisateur avec ID $userId : " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    
+    
+    
+    
+
+    
+
+    
+    
+    
 
     
     

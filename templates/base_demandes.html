@@ -60,9 +60,27 @@ document.querySelectorAll('.service-card').forEach(card => {
     });
 
 
+    (function($) {
     $(document).ready(function() {
-        // Gestion des cartes de service
-        $('.service-card').click(function() {
+
+        console.log("Document prêt et script chargé.");
+
+    $('body').on('click', '.get-comment-modal', function() {
+        console.log("Bouton comment-modal cliqué.");
+
+        var text = $(this).data('comment-text');
+        var dateTime = $(this).data('comment-date');
+
+        console.log("Texte du commentaire: ", text);
+        console.log("Date et heure: ", dateTime);
+
+        $('#serviceText').html(`<strong>Commentaire :</strong> ${text}`);
+        $('#dateTime span').text(dateTime);
+
+        $('#commentViewModal').modal('show');
+    });
+
+    $('.service-card').click(function() {
             var title = $(this).data('title');
             var img = $(this).data('img');
             var detail = $(this).data('detail');
@@ -77,14 +95,12 @@ document.querySelectorAll('.service-card').forEach(card => {
             $('#serviceModal').modal('show');
         });
 
-        // Gestion du bouton de commentaire
         $(document).on('click', '.open-comment-modal', function() {
             var interventionId = $(this).data('id');
             $('#InterventionIdForComment').val(interventionId);
             $('#commentModal').modal('show');
         });
 
-        // Gestion du bouton de modification de statut
         $('#statusModal').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget);
             var currentStatusText = button.data('status-text');
@@ -94,7 +110,6 @@ document.querySelectorAll('.service-card').forEach(card => {
             $(this).find('#interventionId').val(interventionId);
         });
 
-        // Gestion du bouton de clôture d'intervention
         $(document).on('click', '.close-intervention-btn', function() {
             var interventionId = $(this).data('id');
             $.ajax({
@@ -138,7 +153,10 @@ document.querySelectorAll('.service-card').forEach(card => {
     }
 });
 
-    });
+});
+})(jQuery);
+
+    
     </script>
 </body>
 </html>

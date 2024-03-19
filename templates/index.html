@@ -24,6 +24,7 @@
                     <th>Nom</th>
                     <th>Email</th>
                     <th>Rôle</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,6 +42,12 @@
                                 <option value="Intervenant" {% if user.Role == 'Intervenant' %}selected{% endif %}>Intervenant</option>
                                 <option value="Client" {% if user.Role == 'Client' %}selected{% endif %}>Client</option>
                             </select>
+                        </form>
+                    </td>
+                    <td>
+                        <form action="deleteUser.php" method="post" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                            <input type="hidden" name="userId" value="{{ user.UserID }}">
+                            <button type="submit" class="btn btn-danger">Supprimer</button>
                         </form>
                     </td>
                 </tr>

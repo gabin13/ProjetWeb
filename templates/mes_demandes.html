@@ -39,6 +39,7 @@
             <div class="row">
                 {% set found = false %}
                 {% for intervention in interventions %}
+                {% set firstComment = intervention.comments|first %}
                     {% if intervention.StatusID == statusID %}
                         {% set found = true %}
                         <div class="col-md-4">
@@ -63,9 +64,22 @@
                                         {% endif %}
                                         {% if intervention.StatusID == 1 %} <!-- Si le statut est "Terminée" -->
                                                 <button type="button" class="btn btn-secondary btn-sm avoid-intervention-btn" data-id="{{ intervention.InterventionID }}" data-status="{{ intervention.StatusID }}" data-status-text="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">Annuler</button>
-                                                <button type="button" class="btn btn-secondary btn-sm avoid-intervention-btn" data-id="{{ intervention.InterventionID }}" data-status="{{ intervention.StatusID }}" data-status-text="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">Modifier</button>
                                         {% endif %}
+                                        
                                     {% endif %}
+                                    {% if intervention.StatusID in [4, 5] and intervention.comments is not empty %}
+                                    {% for comment in intervention.comments %}
+                                        <button type="button" 
+                                                class="btn btn-secondary btn-sm get-comment-modal" 
+                                                data-toggle="modal" 
+                                                data-target="#commentViewModal" 
+                                                data-intervention-id="{{ intervention.InterventionID }}"
+                                                data-comment-text="{{ comment.CommentText }}" 
+                                                data-comment-date="{{ comment.CommentDateTime | date('Y-m-d H:i:s') }}">
+                                            Voir le commentaire
+                                        </button>
+                                    {% endfor %}
+                                {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -99,7 +113,7 @@
                                     <h3>{% if intervention.UrgencyLevelID == 3 %}<i class="bi bi-exclamation-triangle-fill"></i>{% endif %} {{ intervention.Title }}</h3>
                                 </div>
                                 <div class="text-center mt-2">
-                                    {% if intervention.StatusID == 4 %}
+                                    {% if intervention.StatusID in [4, 5] %}
                                     <button type="button" class="btn btn-secondary btn-sm open-comment-modal" data-toggle="modal" data-target="#commentModal" data-id="{{ intervention.InterventionID }}" data-intervention-id="{{ intervention.ID }}">Laisser un commentaire</button>
                                     {% elseif intervention.StatusID != 5 %}
                                     <button type="button" class="btn btn-info btn-sm modifier-statut-btn" data-toggle="modal" data-target="#statusModal" data-id="{{ intervention.InterventionID }}" data-status="{{ intervention.StatusID }}" data-status-text="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">Modifier le Statut</button>
@@ -129,7 +143,7 @@
                                     <h3>{{ intervention.Title }}</h3>
                                 </div>
                                 <div class="text-center mt-2">
-                                    {% if intervention.StatusID == 4 %}
+                                    {% if intervention.StatusID in [4, 5] %}
                                         <!-- Affiche le bouton de commentaire pour les clients dans les interventions clôturées -->
                                         <button type="button" class="btn btn-secondary btn-sm open-comment-modal" data-toggle="modal" data-target="#commentModal" data-id="{{ intervention.InterventionID }}" data-intervention-id="{{ intervention.ID }}">Laisser un commentaire</button>
                                     {% endif %}
@@ -152,6 +166,7 @@
             <div class="row">
                 {% set found = false %}
                 {% for intervention in interventions %}
+                {% set firstComment = intervention.comments|first %}
                     {% if intervention.StatusID == statusID %}
                         {% set found = true %}
                         <div class="col-md-4">
@@ -167,7 +182,8 @@
                                     <h3>{% if intervention.UrgencyLevelID == 3 %}<i class="bi bi-exclamation-triangle-fill"></i>{% endif %} {{ intervention.Title }}</h3>
                                 </div>
                                 <div class="text-center mt-2">
-                                    {% if intervention.StatusID != 5 %}
+                                    {% if intervention.StatusID in [1, 2, 3] %}
+
                                         <button type="button" class="btn btn-info btn-sm modifier-statut-btn" data-toggle="modal" data-target="#statusModal" data-id="{{ intervention.InterventionID }}" data-status="{{ intervention.StatusID }}" data-status-text="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">Modifier le Statut</button>
                                         {% if intervention.StatusID == 3 %} <!-- Si le statut est "Terminée" -->
                                             <button type="button" class="btn btn-secondary btn-sm close-intervention-btn" data-id="{{ intervention.InterventionID }}" data-status="{{ intervention.StatusID }}" data-status-text="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">Clôturer</button>
@@ -175,9 +191,22 @@
                                         {% endif %}
                                         {% if intervention.StatusID == 1 %} <!-- Si le statut est "Terminée" -->
                                                 <button type="button" class="btn btn-secondary btn-sm avoid-intervention-btn" data-id="{{ intervention.InterventionID }}" data-status="{{ intervention.StatusID }}" data-status-text="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">Annuler</button>
-                                                <button type="button" class="btn btn-secondary btn-sm avoid-intervention-btn" data-id="{{ intervention.InterventionID }}" data-status="{{ intervention.StatusID }}" data-status-text="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">Modifier</button>
                                         {% endif %}
+                                        
                                     {% endif %}
+                                    {% if intervention.StatusID in [4, 5] and intervention.comments is not empty %}
+                                    {% for comment in intervention.comments %}
+                                        <button type="button" 
+                                                class="btn btn-secondary btn-sm get-comment-modal" 
+                                                data-toggle="modal" 
+                                                data-target="#commentViewModal" 
+                                                data-intervention-id="{{ intervention.InterventionID }}"
+                                                data-comment-text="{{ comment.CommentText }}" 
+                                                data-comment-date="{{ comment.CommentDateTime | date('Y-m-d H:i:s') }}">
+                                            Voir le commentaire
+                                        </button>
+                                    {% endfor %}
+                                {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -272,6 +301,27 @@
         </div>
     </div>
   </div>
+
+  <!-- Modal Structure -->
+  <div class="modal fade" id="commentViewModal" tabindex="-1" role="dialog" aria-labelledby="commentViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="commentViewModalLabel">Commentaires de l'intervention</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <p id="serviceText"></p> <!-- Remarquez que j'utilise serviceText ici -->
+            <p id="dateTime">date: <span></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
   
 
 
