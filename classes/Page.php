@@ -377,6 +377,33 @@ class Page {
             return false;
         }
     }
+
+    public function deleteIntervention($interventionId) {
+        try {
+            $this->pdo->beginTransaction();
+    
+            // Suppression des commentaires associés à l'intervention
+            $stmt = $this->pdo->prepare("DELETE FROM comments WHERE InterventionID = :interventionId");
+            $stmt->execute([':interventionId' => $interventionId]);
+    
+            // Suppression des assignements d'intervenants associés à l'intervention
+            $stmt = $this->pdo->prepare("DELETE FROM intervenantassignments WHERE InterventionID = :interventionId");
+            $stmt->execute([':interventionId' => $interventionId]);
+    
+            // Suppression de l'intervention elle-même
+            $stmt = $this->pdo->prepare("DELETE FROM interventions WHERE InterventionID = :interventionId");
+            $stmt->execute([':interventionId' => $interventionId]);
+    
+            $this->pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            // Loguer ou traiter l'erreur ici
+            return false;
+        }
+    }
+    
+    
     
     
     

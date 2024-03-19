@@ -2,6 +2,18 @@
 
 {% block body %}
 
+{% if message %}
+    <div class="alert alert-success">
+        {{ message }}
+    </div>
+{% endif %}
+
+{% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+{% endif %}
+
 
 <div class="container custom-container">
     {% if session.user.Role == 'Client' %}
@@ -85,6 +97,10 @@
                                         </button>
                                     {% endfor %}
                                 {% endif %}
+                                {% if intervention.StatusID in [4, 5] %}
+                                    <button type="button" class="btn btn-danger btn-sm delete-intervention-btn" data-intervention-id="{{ intervention.InterventionID }}">Supprimer</button>
+                                {% endif %}
+
                                 </div>
                             </div>
                         </div>
@@ -214,7 +230,10 @@
                                             Voir le commentaire
                                         </button>
                                     {% endfor %}
-                                {% endif %}
+                                    {% endif %}
+                                    {% if intervention.StatusID in [4, 5] %}
+                                        <button type="button" class="btn btn-danger btn-sm delete-intervention-btn" data-intervention-id="{{ intervention.InterventionID }}">Supprimer</button>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

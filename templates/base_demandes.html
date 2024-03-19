@@ -169,6 +169,25 @@ $('.edit-intervention-btn').click(function() {
         $('#editDate').val(date);
     });
 
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-intervention-btn')) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette intervention ? Cette action est irréversible.')) {
+                var form = document.createElement('form');
+                form.action = 'deleteIntervention.php';
+                form.method = 'post';
+
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'interventionId';
+                input.value = e.target.getAttribute('data-intervention-id');
+
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    });
+
 
 
 
