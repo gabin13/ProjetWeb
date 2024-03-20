@@ -23,6 +23,13 @@ $page = new Page();
 $dateIntervention = new DateTime($_POST['date']);
 $today = new DateTime(); // Date d'aujourd'hui
 
+// Vérifie si la date d'intervention est antérieure à aujourd'hui
+if ($dateIntervention < $today) {
+    $_SESSION['error'] = "La date d'intervention ne peut pas être antérieure à aujourd'hui.";
+    header('Location: mes_demandes.php'); // Redirection vers la page de formulaire
+    exit();
+}
+
 // Calcul de l'urgence en fonction de la nouvelle date
 $interval = $today->diff($dateIntervention);
 $daysDifference = (int)$interval->format('%a');

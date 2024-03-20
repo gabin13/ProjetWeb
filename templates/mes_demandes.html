@@ -26,12 +26,17 @@
 
 
 
-    {% if session.error %}
-    <div id="alert-message" style="display:none;" class="alert alert-success">
-        Votre message ici.
+    {% if message %}
+    <div class="alert alert-success">
+        {{ message }}
     </div>
-    
-    {% endif %}
+{% endif %}
+
+{% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+{% endif %}
 
 
     {% set statusDescriptions = {1: 'En attente', 2: 'En cours', 3: 'Terminée', 4: 'Clôturée', 5:'Annulée'} %}
@@ -160,7 +165,7 @@
                         {% set found = true %}
                         <div class="col-md-4">
                             <div class="card-wrapper">
-                                <div class="service-card" data-title="{{ intervention.Title }}" data-img="{{ imagesByTitle[intervention.Title]|default('path/to/default.jpg') }}" data-detail="{{ intervention.Description }}" data-status="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}">
+                                <div class="service-card" data-title="{{ intervention.Title }}" data-img="{{ imagesByTitle[intervention.Title]|default('path/to/default.jpg') }}" data-detail="{{ intervention.Description }}" data-status="{{ statusDescriptions[intervention.StatusID] }}" data-intervention-id="{{ intervention.ID }}" data-planned-date="{{ intervention.InterventionDate|date('Y-m-d') }}">
                                     <h3>{{ intervention.Title }}</h3>
                                 </div>
                                 <div class="text-center mt-2">
